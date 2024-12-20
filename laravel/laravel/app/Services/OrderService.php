@@ -4,21 +4,26 @@ namespace App\Services;
 
 use App\Exceptions\OrderValidationException;
 use App\Services\Contracts\OrderServiceInterface;
-use App\Services\Contracts\CurrencyConverterInterface;
-use App\Services\CurrencyConverters\TwdCurrencyConverter;
-use App\Services\CurrencyConverters\UsdCurrencyConverter;
+use App\Services\Contracts\CurrencyConverterResolverInterface;
 use App\DTOs\OrderData;
 use Symfony\Component\HttpFoundation\Response;
 
 
 class OrderService implements OrderServiceInterface
 {
+    protected CurrencyConverterResolverInterface $converterResolver;
+
+    public function __construct(CurrencyConverterResolverInterface $converterResolver)
+    {
+        $this->converterResolver = $converterResolver;
+    }
+
     public function processOrder(OrderData $orderData): array
     {
         $this->validateName($orderData->name);
         $this->validateCurrency($orderData->currency);
 
-        $converter = $this->getConverter($orderData->currency);
+        $converter = $this->converterResolver->resolve($orderData->currency);
         $convertedPrice = $converter->convertToTwd($orderData->price);
 
         $this->validatePrice($convertedPrice);
@@ -65,13 +70,5 @@ class OrderService implements OrderServiceInterface
         if (!in_array($currency, $allowed)) {
             throw new OrderValidationException('The currency must be either TWD or USD.', Response::HTTP_BAD_REQUEST);
         }
-    }
-
-    private function getConverter(string $currency): CurrencyConverterInterface
-    {
-        return match ($currency) {
-            'TWD' => new TwdCurrencyConverter(),
-            'USD' => new UsdCurrencyConverter(),
-        };
     }
 }
