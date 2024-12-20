@@ -207,7 +207,7 @@ Ensure the following tools are installed:
 - OrderData (DTO) 用於定義、封裝訂單資料結構
 
 2. Open-Closed Principle (OCP)
-- 新增其他貨幣支援時，只需新增對應的 Converter，不需修改現有程式碼。
+- 新增其他貨幣支援時，對應的換算邏輯為何（非單純定值乘除），僅需在 CurrencyConverterResolver 的映射設定中加上對應的 Converter 類別，不需修改現有程式碼。
 
 3. Interface Segregation Principle (ISP)
 - 以 OrderServiceInterface、CurrencyConverterInterface 清晰定義介面，使得呼叫端僅依賴必要的行為，不需面對不相關的功能。
@@ -219,5 +219,4 @@ Ensure the following tools are installed:
 ### 設計模式:
 - Strategy Pattern (策略模式)：
 
-貨幣轉換行為使用策略模式實作。OrderService 透過 CurrencyConverterResolver 根據不同 currency 取得對應的 Converter（策略）來執行轉換。
-這使得未來要新增其他貨幣只需新增新的 Converter 實作類別並在 Resolver 中處理，不需修改核心業務邏輯程式碼。
+貨幣轉換行為使用策略模式實作。OrderService 透過 CurrencyConverterResolver 根據不同 currency組合（如 USD→TWD）取得對應的 Converter（策略）來執行轉換。透過設定化的映射表，新增新幣別只需新增對應 Converter 與設定，不需修改核心業務邏輯程式碼。
