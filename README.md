@@ -207,7 +207,8 @@ Ensure the following tools are installed:
 - OrderData (DTO) 用於定義、封裝訂單資料結構
 
 2. Open-Closed Principle (OCP)
-- 新增其他貨幣支援時，對應的換算邏輯為何（非單純定值乘除），僅需在 CurrencyConverterResolver 的映射設定中加上對應的 Converter 類別，不需修改現有程式碼。
+> **對應的貨幣換算邏輯基於台幣對美金與美金對台幣可能不同（非單純定值乘除）。**
+- 新增其他貨幣支援時，僅需在 CurrencyConverterResolver 的映射設定中加上對應的 Converter 類別，不需修改現有程式碼。
 
 3. Interface Segregation Principle (ISP)
 - 以 OrderServiceInterface、CurrencyConverterInterface 清晰定義介面，使得呼叫端僅依賴必要的行為，不需面對不相關的功能。
