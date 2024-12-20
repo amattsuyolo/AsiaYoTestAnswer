@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Services\Contracts\CurrencyConverterResolverInterface;
 use App\Services\Contracts\CurrencyConverterInterface;
 use App\Services\CurrencyConverters\UsdToTwdConverter;
-use App\Services\CurrencyConverters\TwdToTwdConverter;
 use App\Exceptions\OrderValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,7 +17,6 @@ class CurrencyConverterResolver implements CurrencyConverterResolverInterface
         // Map currency pairs to the corresponding converter class names
         $this->converters = [
             'USD-TWD' => UsdToTwdConverter::class,
-            'TWD-TWD' => TwdToTwdConverter::class,
             // If 'TWD-USD' is added in the future, simply add one line here
             // 'TWD-USD' => TwdToUsdConverter::class,
         ];
@@ -30,6 +28,17 @@ class CurrencyConverterResolver implements CurrencyConverterResolverInterface
      */
     public function resolve(string $fromCurrency, string $toCurrency): CurrencyConverterInterface
     {
+        // If the two currencies are the same, there is no need to instantiate a Converter.
+        // Return an anonymous class that directly returns the original value.
+        if ($fromCurrency === $toCurrency) {
+            return new class implements CurrencyConverterInterface {
+                public function convert(float $amount): float
+                {
+                    return $amount;
+                }
+            };
+        }
+
         $key = "{$fromCurrency}-{$toCurrency}";
 
         if (isset($this->converters[$key])) {
