@@ -23,8 +23,9 @@ class OrderService implements OrderServiceInterface
         $this->validateName($orderData->name);
         $this->validateCurrency($orderData->currency);
 
-        $converter = $this->converterResolver->resolve($orderData->currency);
-        $convertedPrice = $converter->convertToTwd($orderData->price);
+        $toCurrency = 'TWD';
+        $converter = $this->converterResolver->resolve($orderData->currency, $toCurrency);
+        $convertedPrice = $converter->convert($orderData->price);
 
         $this->validatePrice($convertedPrice);
 

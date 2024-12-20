@@ -5,10 +5,9 @@ namespace App\Services\Contracts;
 interface CurrencyConverterInterface
 {
     /**
-     * Convert given price to TWD
+     * Convert a given amount from one currency to another
      *
-     * @param float $price
-     * @return float converted price in TWD
+     * @param float $amount
      */
-    public function convertToTwd(float $price): float;
+    public function convert(float $amount): float;
 }
