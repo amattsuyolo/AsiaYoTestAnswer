@@ -144,7 +144,8 @@ RENAME TABLE orders_partitioned TO orders;
   - 管理較複雜，寫入性能可能受到影響。
   - 索引僅適用於單一分區，跨分區查詢效能可能下降。
 
-
+---
+# API 實作測驗
 ## Prerequisites
 
 Ensure the following tools are installed:
@@ -171,5 +172,52 @@ Ensure the following tools are installed:
     composer install
     cp .env.example .env
     php artisan key:generate
-5. Access the Application
-   http://127.0.0.1:8000
+5. Access the application by curl
+   ```
+   curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json" \
+     -d '{
+           "id": "A0000001",
+           "name": "Melody Holiday Inn",
+           "address": {
+               "city": "taipei-city",
+               "district": "da-an-district",
+               "street": "fuxing-south-road"
+           },
+           "price": "1950",
+           "currency": "TWD"
+         }' \
+     http://127.0.0.1:8000/api/orders
+   ```
+
+6. Run test
+   ```
+   php artisan test tests/Feature/OrderApiTest.php
+   ```
+
+## 專案說明
+
+此專案透過Laravel典型MVC架構進行開發，並透過下列方法確保程式碼品質與維護性：
+
+### SOLID 原則:
+1. Single Responsibility Principle (SRP)
+- OrderRequest 負責驗證輸入格式
+- OrderService 專注於業務邏輯處理
+- OrderData (DTO) 用於定義、封裝訂單資料結構
+
+2. Open-Closed Principle (OCP)
+- 新增其他貨幣支援時，只需新增對應的 Converter，不需修改現有程式碼。
+
+3. Interface Segregation Principle (ISP)
+- 以 OrderServiceInterface、CurrencyConverterInterface 清晰定義介面，使得呼叫端僅依賴必要的行為，不需面對不相關的功能。
+
+4. Dependency Inversion Principle (DIP)
+- Controller 依賴 OrderServiceInterface 而非 OrderService 實作類別，並透過 Service Container 綁定介面到實作。
+- OrderService 不直接 new 出 Converter 實例，而是依賴 CurrencyConverterResolverInterface（例如 CurrencyConverterResolver）來取得適當的 Converter 實例。如此，Service 只依賴抽象介面，不依賴具體實作。
+
+### 設計模式:
+- Strategy Pattern (策略模式)：
+
+貨幣轉換行為使用策略模式實作。OrderService 透過 CurrencyConverterResolver 根據不同 currency 取得對應的 Converter（策略）來執行轉換。
+這使得未來要新增其他貨幣只需新增新的 Converter 實作類別並在 Resolver 中處理，不需修改核心業務邏輯程式碼。
